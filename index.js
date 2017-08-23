@@ -10,6 +10,38 @@ var TransmissionTemplate = require('./getui/template/TransmissionTemplate');
 var SingleMessage = require('./getui/message/SingleMessage');
 const _ = require('lodash');
 
+const createPromiseCallback = () => {
+	for(let i = 0; i < arguments.length; i++) {
+		if(typeof arguments[i] === "function") {
+			return arguments[i];
+		}
+	}
+	let cb;
+	if (!global.Promise) {
+		cb = () => {};
+		cb.promise = {};
+		
+		const throwPromiseNotDefined = () => {
+			throw new Error(
+				'Your Node runtime does support ES6 Promises. ' +
+				'Set "global.Promise" to your preferred implementation of promises.');
+		};
+		
+		Object.defineProperty(cb.promise, 'then', { get: throwPromiseNotDefined });
+		Object.defineProperty(cb.promise, 'catch', { get: throwPromiseNotDefined });
+		return cb;
+	}
+	
+	const promise = new global.Promise((resolve, reject) => {
+		cb = (err, data) => {
+			if (err) return reject(err);
+			return resolve(data);
+		};
+	});
+	cb.promise = promise;
+	return cb;
+};
+
 const defaultOptions = {
 	host: 'https://api.getui.com/apiex.htm', // http://sdk.open.api.igexin.com/apiex.htm
 	appId: 'eECHDNfs5Z680lzQMEHCt060',
@@ -23,7 +55,8 @@ function tran(options) {
 	this.gt = new GeTui(this.options.host, this.options.appKey, this.options.masterSecret);
 }
 tran.prototype ={
-	sendMessage:function (title,info,cId) {
+	sendMessage:function (title,info,cId,cb) {
+		cb = cb || createPromiseCallback();
 		var template =  new TransmissionTemplate({
 			appId: this.options.appId,
 			appKey: this.options.appKey,
@@ -57,17 +90,24 @@ tran.prototype ={
 			clientId: cId
 		});
 		var that = this;
-		this.gt.pushMessageToSingle(message, target, function(err, res){
-			console.log(res);
+		that.gt.pushMessageToSingle(message, target, function(err, res){
 			if(err != null && err.exception != null && err.exception instanceof  RequestError){
 				var requestId = err.exception.requestId;
 				console.log(err.exception.requestId);
 				that.gt.pushMessageToSingle(message,target,requestId,function(err, res){
-					console.log(err);
-					console.log(res);
+					if(err){
+						console.log(err);
+						console.log(res);
+						cb(err,res);
+					}else{
+						cb(null,res);
+					}
 				});
+			}else{
+				cb(null,res);
 			}
 		});
+		return cb.promise;
 	}
 };
 module.exports = tran;
