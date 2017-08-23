@@ -3,28 +3,18 @@
  */
 var GeTui = require('./GT.push');
 var Target = require('./getui/Target');
-
-var APNTemplate = require('./getui/template/APNTemplate');
-var BaseTemplate = require('./getui/template/BaseTemplate');
 var APNPayload = require('./payload/APNPayload');
 var DictionaryAlertMsg = require('./payload/DictionaryAlertMsg');
-var SimpleAlertMsg = require('./payload/SimpleAlertMsg');
-var NotyPopLoadTemplate = require('./getui/template/NotyPopLoadTemplate');
-var LinkTemplate = require('./getui/template/LinkTemplate');
-var NotificationTemplate = require('./getui/template/NotificationTemplate');
-var PopupTransmissionTemplate = require('./getui/template/PopupTransmissionTemplate');
 var TransmissionTemplate = require('./getui/template/TransmissionTemplate');
 
 var SingleMessage = require('./getui/message/SingleMessage');
-var AppMessage = require('./getui/message/AppMessage');
-var ListMessage = require('./getui/message/ListMessage');
 const _ = require('lodash');
 
 const defaultOptions = {
-	host: 'https://api.getui.com/apiex.htm',
-	appId: 'eECHDNfs5Z680lzQMEHCt6',
-	appKey: 'CcArSfD8IrA7l8diZDxw46',
-	masterSecret: 'VDLFyCWoyd9onOrmCP4m78',
+	host: 'https://api.getui.com/apiex.htm', // http://sdk.open.api.igexin.com/apiex.htm
+	appId: 'eECHDNfs5Z680lzQMEHCt060',
+	appKey: 'CcArSfD8IrA7l8diZDxw4060',
+	masterSecret: 'VDLFyCWoyd9onOrmCP4m7080',
 	title: "智能家居信息"
 };
 function tran(options) {
@@ -33,18 +23,10 @@ function tran(options) {
 	this.gt = new GeTui(this.options.host, this.options.appKey, this.options.masterSecret);
 }
 tran.prototype ={
-	setConfig:function (host,appId,appKey,masterSecret,title) {
-		this.host =host;
-		this.appId = appId;
-		this.appKey = appKey;
-		this.masterSecret = masterSecret;
-		this.title = title;
-		this.gt =  new GeTui(this.host, this.appKey, this.masterSecret);
-	},
 	sendMessage:function (title,info,cId) {
 		var template =  new TransmissionTemplate({
-			appId: this.appId,
-			appKey: this.appKey,
+			appId: this.options.appId,
+			appKey: this.options.appKey,
 			transmissionType: 1,
 			transmissionContent: JSON.stringify(info)
 		});
@@ -57,11 +39,11 @@ tran.prototype ={
 		alertMsg.locArgs = Array("locArgs");
 		alertMsg.launchImage = "launchImage";
 		//ios8.2以上版本支持
-		alertMsg.title = "警报信息";
-		alertMsg.titleLocKey = this.title; // titleLocKey
+		alertMsg.title = "信息";
+		alertMsg.titleLocKey = this.options.title; // titleLocKey
 		alertMsg.titleLocArgs = Array("titleLocArgs");
 		payload.alertMsg=alertMsg;
-		template.setApnInfo(payload);
+		// template.setApnInfo(payload);
 		//个推信息体
 		var message = new SingleMessage({
 			isOffline: true,                        //是否离线
@@ -71,7 +53,7 @@ tran.prototype ={
 		});
 		//接收方
 		var target = new Target({
-			appId: this.appId,
+			appId: this.options.appId,
 			clientId: cId
 		});
 		var that = this;
