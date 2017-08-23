@@ -1,6 +1,6 @@
 {
   "name": "tui-helper",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "tui-helper",
   "main": "index.js",
   "scripts": {
