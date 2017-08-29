@@ -51,7 +51,7 @@ const defaultOptions = {
 };
 function tran(options) {
 	// http的域名
-	this.options = _.assign({}, defaultOptions, options);
+	this.options = _.merge({}, defaultOptions, options);
 	this.gt = new GeTui(this.options.host, this.options.appKey, this.options.masterSecret);
 }
 tran.prototype ={
